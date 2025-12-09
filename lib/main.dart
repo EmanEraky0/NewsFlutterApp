@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:news_flutter_app/features/news/domain/usecases/get_all_articles.dart';
 import 'package:news_flutter_app/features/news/presentation/providers/news_provider.dart';
 import 'package:news_flutter_app/features/news/presentation/screens/news_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'core/services/notification_service.dart';
 import 'di/injector.dart';
@@ -14,13 +15,25 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Background message: ${message.messageId}');
 }
 
+Future<void> requestNotificationPermissions() async {
+  final status = await Permission.notification.status;
+  print('Notification status BEFORE request: $status');
+  if (!status.isGranted) {
+    final result = await Permission.notification.request();
 
+    print('Notification status AFTER request: $result');
+
+    if (result.isPermanentlyDenied) {
+      await openAppSettings();
+    }
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  await requestNotificationPermissions();
   NotificationService.initialize();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
