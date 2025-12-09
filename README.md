@@ -1,6 +1,6 @@
 # news_flutter_app
-
-A new Flutter project.
+ 
+news Flutter project.
 
 ## Getting Started
 
